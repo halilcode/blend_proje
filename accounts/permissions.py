@@ -16,6 +16,7 @@ Roles and their capabilities:
 
 from django.contrib.auth.models import Group, Permission
 from django.db import DatabaseError, models
+from django.http import Http404
 
 ROLE_ADMIN = "admin"
 ROLE_DEPARTMENT_HEAD = "department_head"
@@ -295,6 +296,9 @@ class RoleScopedAdminMixin:
 
         return False
 
+    def _get_obj_does_not_exist_redirect(self, request, opts, object_id):
+        raise Http404(f"{opts.verbose_name} bulunamadı.")
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         user = request.user
         if user.is_authenticated and not user.is_superuser and user.role != ROLE_ADMIN:
@@ -381,6 +385,9 @@ class RoleScopedInlineMixin:
         if user.role == ROLE_INSTRUCTOR:
             return self.instructor_can_delete
         return False
+
+    def _get_obj_does_not_exist_redirect(self, request, opts, object_id):
+        raise Http404(f"{opts.verbose_name} bulunamadı.")
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         user = request.user
