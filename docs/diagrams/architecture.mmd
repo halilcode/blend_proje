@@ -1,0 +1,49 @@
+flowchart LR
+    subgraph users["Kullanıcılar (tarayıcı)"]
+        direction TB
+        U1["Öğrenci"]
+        U2["Öğretim üyesi"]
+        U3["Bölüm başkanı"]
+        U4["Sistem yöneticisi"]
+    end
+
+    subgraph server["Uygulama sunucusu"]
+        direction TB
+        NGINX["Nginx<br/>HTTPS · statik dosyalar"]
+        DJANGO["Django web uygulaması<br/>(Gunicorn)<br/>accounts · academics · grading · reports"]
+        WORKER["Celery worker<br/>toplu not yükleme · izlence okuma<br/>PO yeniden hesaplama · PDF rapor · e-posta"]
+    end
+
+    subgraph data["Veri katmanı"]
+        direction TB
+        PG[("PostgreSQL<br/>ana veritabanı")]
+        REPLICA[("PostgreSQL<br/>okuma kopyası<br/>raporlar")]
+        REDIS[("Redis<br/>önbellek · oturum<br/>görev kuyruğu")]
+        FILES[("Dosya deposu<br/>izlence PDF · Excel")]
+    end
+
+    subgraph external["Harici servisler"]
+        direction TB
+        SSO["Kurumsal giriş<br/>(SSO / Microsoft 365)"]
+        OBS["Acıbadem OBS<br/>öğrenci & ders listesi"]
+        SMTP["E-posta servisi<br/>(SMTP)"]
+    end
+
+    users -- HTTPS --> NGINX
+    NGINX --> DJANGO
+    DJANGO -- okuma / yazma --> PG
+    PG -. replikasyon .-> REPLICA
+    DJANGO -- rapor sorguları --> REPLICA
+    DJANGO -- önbellek / oturum --> REDIS
+    DJANGO -- görev gönder --> REDIS
+    REDIS -- görev al --> WORKER
+    WORKER --> PG
+    WORKER --> FILES
+    DJANGO --> FILES
+    DJANGO -- OAuth2 / OIDC --> SSO
+    WORKER -- CSV / API içe aktarma --> OBS
+    WORKER -- bildirim --> SMTP
+
+    %% Kesik çizgili kutular: planlanan (henüz kodda yok) bileşenler
+    classDef planned stroke-dasharray: 6 4,fill:#ffffff
+    class NGINX,WORKER,REPLICA,REDIS,FILES,SSO,OBS,SMTP planned
