@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PO Takip Sistemi</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e4e7eb; }
+    td.score { text-align: right; font-variant-numeric: tabular-nums; width: 6rem; }
+    .muted { color: #7b8794; }
+  </style>
+</head>
+<body>
+  <h1>Program Çıktısı (PO) Takip Sistemi</h1>
+
+  {% if user.is_authenticated %}
+    <p>Hoş geldin, {{ user }} <span class="muted">({{ user.get_role_display }})</span>.
+      <form method="post" action="{% url 'admin:logout' %}" style="display:inline">{% csrf_token %}<button type="submit">Çıkış</button></form>
+    </p>
+
+    {% if user.is_student %}
+      <h2>PO profilin</h2>
+      <table>
+        <thead><tr><th>Program çıktısı</th><th class="score">Puan</th></tr></thead>
+        <tbody>
+          {% for row in po_rows %}
+            <tr>
+              <td>{{ row.outcome }}</td>
+              <td class="score">{% if row.score is not None %}{{ row.score }}{% else %}<span class="muted">—</span>{% endif %}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="2" class="muted">Henüz bir puan yok.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% elif user.is_staff %}
+      <p><a href="{% url 'admin:index' %}">Yönetim paneline git →</a></p>
+    {% endif %}
+  {% else %}
+    <p><a href="{% url 'admin:login' %}?next=/">Giriş yap</a></p>
+  {% endif %}
+</body>
+</html>

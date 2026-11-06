@@ -1,0 +1,96 @@
+classDiagram
+    direction TB
+
+    class User {
+        +username: str
+        +role: Role
+        +student_number: str?
+        +is_student() bool
+        +is_instructor() bool
+        +is_department_head() bool
+    }
+    class Role {
+        <<enumeration>>
+        ADMIN
+        DEPARTMENT_HEAD
+        INSTRUCTOR
+        STUDENT
+    }
+    class Department {
+        +code: str
+        +name: str
+    }
+    class ProgramOutcome {
+        +number: int
+        +short_name: str
+        +description: str
+        +code() str
+    }
+    class Course {
+        +code: str
+        +name: str
+        +credits: int
+        +ects: int
+    }
+    class CourseContribution {
+        +level: int [1-5]
+    }
+    class CourseOffering {
+        +year: int
+        +semester: Semester
+        +section: int
+    }
+    class LearningOutcome {
+        +number: int
+        +description: str
+        +code() str
+    }
+    class LearningOutcomeMapping {
+        +weight: Decimal [%]
+    }
+    class Assessment {
+        +name: str
+        +kind: Kind
+        +max_score: Decimal
+        +date: date
+    }
+    class AssessmentMapping {
+        +weight: Decimal [%]
+        +clean()
+    }
+    class Enrollment {
+        +enrolled_at: datetime
+    }
+    class Grade {
+        +score: Decimal
+        +updated_at: datetime
+        +percentage() Decimal
+        +clean()
+    }
+    class ScoringService {
+        <<service>>
+        +learning_outcome_scores(enrollment) dict
+        +program_outcome_scores(enrollment) dict
+        +student_po_profile(student) dict
+        +weighted_average(pairs) Decimal
+    }
+
+    User --> Role
+    Department "1" o-- "*" User : üyeler
+    Department "1" --> "0..1" User : başkan
+    Department "1" *-- "*" ProgramOutcome
+    Department "1" o-- "*" Course
+    Course "1" *-- "*" LearningOutcome : izlence
+    Course "1" *-- "*" CourseOffering : dönemler
+    Course "1" -- "*" CourseContribution
+    ProgramOutcome "1" -- "*" CourseContribution
+    LearningOutcome "1" -- "*" LearningOutcomeMapping
+    ProgramOutcome "1" -- "*" LearningOutcomeMapping
+    CourseOffering "*" o-- "*" User : öğretim üyeleri
+    CourseOffering "1" *-- "*" Assessment
+    Assessment "1" -- "*" AssessmentMapping
+    LearningOutcome "1" -- "*" AssessmentMapping
+    User "1" -- "*" Enrollment : öğrenci
+    CourseOffering "1" *-- "*" Enrollment
+    Enrollment "1" *-- "*" Grade
+    Assessment "1" -- "*" Grade
