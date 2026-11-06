@@ -122,3 +122,13 @@ erDiagram
 | **Girilmemiş not 0 sayılmaz** | Henüz notu girilmemiş değerlendirmeler hesaba katılmaz. Böylece dönem ortasında puanlar haksız yere düşmez. |
 | **Kısıtlar veritabanında** | `UNIQUE` ve `CHECK` kısıtları (ağırlık 0–100, katkı 1–5, not ≥ 0) uygulama hatası olsa bile veriyi tutarlı tutar. |
 | **Puanlar saklanmıyor, hesaplanıyor** | Şimdilik puanlar her istekte hesaplanıyor (`grading/scoring.py`). Veri büyüyünce önbellek veya materialized view eklenebilir. |
+
+## Diyagram dosyaları
+
+| Diyagram | Kaynak (Mermaid) | Görsel |
+|---|---|---|
+| Sistem mimarisi | [diagrams/architecture.mmd](diagrams/architecture.mmd) | [img/architecture.svg](img/architecture.svg) |
+| Sınıf diyagramı | [diagrams/class-diagram.mmd](diagrams/class-diagram.mmd) | [img/class-diagram.svg](img/class-diagram.svg) |
+| ER diyagramı | [diagrams/data-model.mmd](diagrams/data-model.mmd) | [img/data-model.svg](img/data-model.svg) |
+
+Mimari diyagramında kesik çerçeveli kutular planlanan, düz çerçeveliler bugün kodda olan bileşenlerdir.
