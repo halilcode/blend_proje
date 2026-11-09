@@ -34,7 +34,26 @@ class User(AbstractUser):
         # does not treat every non-student as a duplicate.
         if not self.student_number:
             self.student_number = None
+
+        if self.role == self.Role.STUDENT:
+            self.is_staff = False
+            self.is_superuser = False
+        elif self.role == self.Role.ADMIN:
+            self.is_staff = True
+            self.is_superuser = True
+        else:
+            self.is_staff = True
+
         super().save(*args, **kwargs)
+        self.sync_role_group()
+
+    def sync_role_group(self):
+        from .permissions import sync_user_groups
+        sync_user_groups(self)
+
+    @property
+    def is_admin(self):
+        return self.role == self.Role.ADMIN or self.is_superuser
 
     @property
     def is_student(self):
