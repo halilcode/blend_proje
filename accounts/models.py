@@ -1,9 +1,21 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager as BaseUserManager
 from django.db import models
+
+
+class UserManager(BaseUserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        # User.save() derives is_staff/is_superuser from the role, so a superuser
+        # left with the default "student" role would be stripped of admin access.
+        extra_fields.setdefault("role", User.Role.ADMIN)
+        if extra_fields["role"] != User.Role.ADMIN:
+            raise ValueError("Süper kullanıcının rolü 'admin' olmalıdır.")
+        return super().create_superuser(username, email, password, **extra_fields)
 
 
 class User(AbstractUser):
     """A system user. Every user has exactly one role."""
+
+    objects = UserManager()
 
     class Role(models.TextChoices):
         ADMIN = "admin", "Sistem Yöneticisi"

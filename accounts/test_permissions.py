@@ -1,5 +1,8 @@
+import os
 from decimal import Decimal
+from unittest import mock
 
+from django.core.management import call_command
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -19,6 +22,27 @@ from grading.models import Assessment, AssessmentMapping, Enrollment, Grade
 
 class RoleGroupSyncTests(TestCase):
     """Verify that is_staff and group memberships update automatically on role change."""
+
+    def test_createsuperuser_command_creates_working_admin(self):
+        with mock.patch.dict(os.environ, {"DJANGO_SUPERUSER_PASSWORD": "Yonetici-12345"}):
+            call_command(
+                "createsuperuser",
+                interactive=False,
+                username="yonetici",
+                email="yonetici@example.com",
+                verbosity=0,
+            )
+        admin = User.objects.get(username="yonetici")
+        self.assertEqual(admin.role, User.Role.ADMIN)
+        self.assertTrue(admin.is_staff)
+        self.assertTrue(admin.is_superuser)
+        client = Client()
+        self.assertTrue(client.login(username="yonetici", password="Yonetici-12345"))
+        self.assertEqual(client.get(reverse("admin:index")).status_code, 200)
+
+    def test_create_superuser_rejects_non_admin_role(self):
+        with self.assertRaises(ValueError):
+            User.objects.create_superuser("bad", password="pw", role=User.Role.STUDENT)
 
     def test_student_defaults_to_non_staff_and_no_role_groups(self):
         student = User.objects.create_user("student1", password="pw", role=User.Role.STUDENT)
