@@ -43,9 +43,15 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       margin-bottom: 2rem;
     }
-    /* Chart Styles */
+    /* Chart Styles
+       The plot area (.plot-grid and every .bar-track) has the same fixed height,
+       so a bar's height in % maps exactly onto the 0–100 axis. Labels sit
+       outside that area so they never squeeze the bars. */
     .chart-container {
       margin: 1.5rem 0 0.5rem;
+      --value-h: 24px;   /* room above the plot for a 100-point bar's label */
+      --track-h: 200px;  /* height of the 0–100 plot area */
+      --axis-w: 40px;
     }
     .chart-scroll-wrapper {
       overflow-x: auto;
@@ -53,46 +59,65 @@
       padding-bottom: 0.5rem;
     }
     .bar-chart {
-      display: flex;
-      align-items: flex-end;
-      height: 240px;
-      min-width: 620px;
-      padding: 20px 10px 0 35px;
-      border-bottom: 2px solid #cbd5e1;
       position: relative;
+      display: flex;
       gap: 12px;
+      min-width: 620px;
+      padding: 8px 10px 0 var(--axis-w);
+    }
+    .plot-grid {
+      position: absolute;
+      left: var(--axis-w);
+      right: 10px;
+      top: calc(8px + var(--value-h));
+      height: var(--track-h);
+      border-bottom: 2px solid #cbd5e1;
+      pointer-events: none;
     }
     .y-axis-line {
       position: absolute;
-      left: 35px;
-      right: 10px;
+      left: 0;
+      right: 0;
       border-top: 1px dashed #e2e8f0;
-      pointer-events: none;
     }
     .y-axis-label {
       position: absolute;
-      left: 0;
-      width: 30px;
+      left: calc(-1 * var(--axis-w));
+      width: calc(var(--axis-w) - 8px);
       text-align: right;
       font-size: 0.75rem;
+      line-height: 1;
       color: var(--text-muted);
-      transform: translateY(-50%);
+      transform: translateY(50%);
     }
     .chart-col {
       flex: 1;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100%;
-      justify-content: flex-end;
+      padding-top: var(--value-h);
+      border-radius: 6px;
+      outline: none;
+      cursor: default;
+    }
+    .bar-track {
       position: relative;
-      z-index: 1;
+      width: 100%;
+      height: var(--track-h);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
     }
     .bar-value {
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin-bottom: 4px;
+      text-align: center;
       font-size: 0.75rem;
       font-weight: 600;
       color: #0f172a;
-      margin-bottom: 4px;
       white-space: nowrap;
     }
     .bar-value.empty {
@@ -122,6 +147,39 @@
       color: var(--text-muted);
       text-align: center;
     }
+    .chart-col:hover .bar-fill,
+    .chart-col:focus-visible .bar-fill { filter: brightness(1.15); }
+    .chart-col:focus-visible { box-shadow: 0 0 0 2px var(--primary); }
+
+    /* Tooltip: shown on hover, and on keyboard focus / tap (tabindex) */
+    .po-tooltip {
+      position: absolute;
+      top: var(--value-h);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      width: 220px;
+      padding: 0.6rem 0.75rem;
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+      font-size: 0.8rem;
+      line-height: 1.4;
+      text-align: left;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.12s ease;
+      pointer-events: none;
+    }
+    .po-tooltip.align-left { left: 0; transform: none; }
+    .po-tooltip.align-right { left: auto; right: 0; transform: none; }
+    .po-tooltip strong { display: block; font-size: 0.85rem; }
+    .po-tooltip .tip-score { display: block; margin-top: 0.35rem; color: #93c5fd; font-weight: 600; }
+    .po-tooltip .tip-score.empty { color: #cbd5e1; font-weight: normal; }
+    .chart-col:hover .po-tooltip,
+    .chart-col:focus .po-tooltip,
+    .chart-col:focus-within .po-tooltip { opacity: 1; visibility: visible; }
     .chart-caption {
       font-size: 0.8rem;
       color: var(--text-muted);
@@ -133,10 +191,8 @@
     }
 
     @media (max-width: 640px) {
-      .bar-chart {
-        min-width: 580px;
-        height: 200px;
-      }
+      .bar-chart { min-width: 580px; }
+      .chart-container { --track-h: 170px; }
       body {
         padding: 0 0.75rem;
         margin: 1rem auto;
@@ -193,32 +249,38 @@
         <h2>PO profilin</h2>
         <div class="chart-container">
           <div class="chart-scroll-wrapper">
-            <div class="bar-chart" role="region" aria-label="Program Çıktıları Grafiği">
-              <!-- Grid lines for Y-axis -->
-              <span class="y-axis-label" style="bottom: 100%;">100</span>
-              <div class="y-axis-line" style="bottom: 100%;"></div>
-
-              <span class="y-axis-label" style="bottom: 75%;">75</span>
-              <div class="y-axis-line" style="bottom: 75%;"></div>
-
-              <span class="y-axis-label" style="bottom: 50%;">50</span>
-              <div class="y-axis-line" style="bottom: 50%;"></div>
-
-              <span class="y-axis-label" style="bottom: 25%;">25</span>
-              <div class="y-axis-line" style="bottom: 25%;"></div>
-
-              <span class="y-axis-label" style="bottom: 0%;">0</span>
+            <div class="bar-chart" role="list" aria-label="Program Çıktıları Grafiği">
+              <div class="plot-grid" aria-hidden="true">
+                <div class="y-axis-line" style="bottom: 100%;"></div><span class="y-axis-label" style="bottom: 100%;">100</span>
+                <div class="y-axis-line" style="bottom: 75%;"></div><span class="y-axis-label" style="bottom: 75%;">75</span>
+                <div class="y-axis-line" style="bottom: 50%;"></div><span class="y-axis-label" style="bottom: 50%;">50</span>
+                <div class="y-axis-line" style="bottom: 25%;"></div><span class="y-axis-label" style="bottom: 25%;">25</span>
+                <span class="y-axis-label" style="bottom: 0%;">0</span>
+              </div>
 
               {% for row in po_rows %}
-                <div class="chart-col" title="{{ row.outcome.code }}: {{ row.outcome.short_name }}{% if row.has_score %} ({{ row.score }}){% else %} (Henüz puan yok){% endif %}">
-                  {% if row.has_score %}
-                    <span class="bar-value">{{ row.score }}</span>
-                    <div class="bar-fill" style="height: {{ row.score_percent }}%;"></div>
-                  {% else %}
-                    <span class="bar-value empty">—</span>
-                    <div class="bar-empty" title="Puan yok"></div>
-                  {% endif %}
+                <div class="chart-col" role="listitem" tabindex="0"
+                     aria-label="{{ row.outcome.code }}: {{ row.outcome.short_name }}. {% if row.has_score %}Puan {{ row.score }}{% else %}Henüz puan yok{% endif %}">
+                  <div class="bar-track">
+                    {% if row.has_score %}
+                      <span class="bar-value" style="bottom: {{ row.score_percent }}%;">{{ row.score }}</span>
+                      <div class="bar-fill" style="height: {{ row.score_percent }}%;"></div>
+                    {% else %}
+                      <span class="bar-value empty" style="bottom: 6px;">—</span>
+                      <div class="bar-empty"></div>
+                    {% endif %}
+                  </div>
                   <span class="bar-label">{{ row.outcome.code }}</span>
+                  <div class="po-tooltip{% if forloop.counter <= 2 %} align-left{% elif forloop.revcounter <= 2 %} align-right{% endif %}" role="tooltip" aria-hidden="true">
+                    <strong>{{ row.outcome.code }}</strong>
+                    {{ row.outcome.short_name }}
+                    {% if row.outcome.description %}<span style="display:block; margin-top:0.25rem; color:#cbd5e1;">{{ row.outcome.description|truncatechars:140 }}</span>{% endif %}
+                    {% if row.has_score %}
+                      <span class="tip-score">Puan: {{ row.score }} / 100</span>
+                    {% else %}
+                      <span class="tip-score empty">Henüz puan yok</span>
+                    {% endif %}
+                  </div>
                 </div>
               {% empty %}
                 <p class="muted" style="margin: auto;">Henüz program çıktısı tanımlanmamış.</p>
@@ -226,7 +288,7 @@
             </div>
           </div>
           <div class="chart-caption">
-            <span>💡 Sütunların üzerine gelerek PO detaylarını görebilirsiniz.</span>
+            <span>💡 Ayrıntılar için bir sütunun üzerine gelin veya dokunun.</span>
             <span>📱 Mobilde yana kaydırarak tüm PO'ları inceleyebilirsiniz.</span>
           </div>
         </div>

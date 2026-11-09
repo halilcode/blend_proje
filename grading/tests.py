@@ -199,3 +199,27 @@ class StudentPOProfileChartTests(TestCase):
         self.assertContains(resp, "name=\"viewport\"")
         self.assertContains(resp, "chart-scroll-wrapper")
 
+
+    def test_bar_value_label_sits_on_top_of_its_bar(self):
+        self.client.login(username="student_chart", password="password")
+        resp = self.client.get("/")
+        # The value label is positioned at the bar's height, inside the same
+        # fixed-height plot track, so it always sits right above the bar.
+        self.assertContains(resp, 'class="bar-value" style="bottom: 90.0%;"')
+        self.assertContains(resp, 'class="bar-track"', count=3)
+
+    def test_axis_shows_full_zero_to_hundred_scale(self):
+        self.client.login(username="student_chart", password="password")
+        resp = self.client.get("/")
+        for tick in ("100", "75", "50", "25", "0"):
+            self.assertContains(resp, f'<span class="y-axis-label" style="bottom: {tick}%;">{tick}</span>', html=False)
+
+    def test_each_column_has_tooltip_with_po_details(self):
+        self.client.login(username="student_chart", password="password")
+        resp = self.client.get("/")
+        content = resp.content.decode("utf-8")
+        self.assertEqual(content.count('role="tooltip"'), 3)
+        self.assertEqual(content.count('tabindex="0"'), 3)
+        self.assertContains(resp, "Math &amp; Science")
+        self.assertContains(resp, "Puan: 90,0 / 100")
+        self.assertContains(resp, "Henüz puan yok", count=4)  # 2 tooltips + 2 aria-labels
