@@ -103,7 +103,11 @@ else:
 # --- Authentication -------------------------------------------------------------
 
 AUTH_USER_MODEL = "accounts.User"
-LOGIN_URL = "admin:login"
+# Everyone (students included) signs in through the site's own login page;
+# the admin login only accepts staff accounts.
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "home"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
