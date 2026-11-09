@@ -1,5 +1,7 @@
 # PO Takip Sistemi
 
+[![CI](https://github.com/halilcode/blend_proje/actions/workflows/ci.yml/badge.svg)](https://github.com/halilcode/blend_proje/actions/workflows/ci.yml)
+
 Öğrencilerin **Program Çıktısı (PO)** puanlarını yöneten web tabanlı sistem.
 CSE 311 & CSE 321 takım projesi (Güz 2026). Pilot müşteri: Acıbadem CSE.
 
