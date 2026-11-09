@@ -5,41 +5,260 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PO Takip Sistemi</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.5;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { margin: 0; font-size: 1.75rem; color: #0f172a; }
+    h2 { font-size: 1.25rem; color: #334155; margin-top: 0; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+    /* Chart Styles */
+    .chart-container {
+      margin: 1.5rem 0 0.5rem;
+    }
+    .chart-scroll-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.5rem;
+    }
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      height: 240px;
+      min-width: 620px;
+      padding: 20px 10px 0 35px;
+      border-bottom: 2px solid #cbd5e1;
+      position: relative;
+      gap: 12px;
+    }
+    .y-axis-line {
+      position: absolute;
+      left: 35px;
+      right: 10px;
+      border-top: 1px dashed #e2e8f0;
+      pointer-events: none;
+    }
+    .y-axis-label {
+      position: absolute;
+      left: 0;
+      width: 30px;
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transform: translateY(-50%);
+    }
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+      z-index: 1;
+    }
+    .bar-value {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+    .bar-value.empty {
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+    .bar-fill {
+      width: 100%;
+      max-width: 38px;
+      background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 6px 6px 0 0;
+      transition: height 0.3s ease;
+      min-height: 4px;
+    }
+    .bar-empty {
+      width: 100%;
+      max-width: 38px;
+      height: 6px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 3px;
+      background: #f1f5f9;
+    }
+    .bar-label {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .chart-caption {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .bar-chart {
+        min-width: 580px;
+        height: 200px;
+      }
+      body {
+        padding: 0 0.75rem;
+        margin: 1rem auto;
+      }
+      .card {
+        padding: 1rem;
+      }
+    }
+
+    /* Table Styles */
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e4e7eb; }
-    td.score { text-align: right; font-variant-numeric: tabular-nums; width: 6rem; }
-    .muted { color: #7b8794; }
+    th, td { text-align: left; padding: .65rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    th { font-weight: 600; color: var(--text-muted); }
+    td.score { text-align: right; font-variant-numeric: tabular-nums; width: 6rem; font-weight: 600; }
+    .muted { color: var(--text-muted); }
+    button {
+      background: #e2e8f0;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    button:hover { background: #cbd5e1; }
+    a.btn-admin {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    a.btn-admin:hover { background: var(--primary-hover); }
   </style>
 </head>
 <body>
-  <h1>Program Çıktısı (PO) Takip Sistemi</h1>
+  <div class="header-bar">
+    <h1>Program Çıktısı (PO) Takip Sistemi</h1>
+    {% if user.is_authenticated %}
+      <div>
+        Hoş geldin, <strong>{{ user }}</strong> <span class="muted">({{ user.get_role_display }})</span>
+        <form method="post" action="{% url 'admin:logout' %}" style="display:inline; margin-left: 0.5rem;">
+          {% csrf_token %}
+          <button type="submit">Çıkış</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
 
   {% if user.is_authenticated %}
-    <p>Hoş geldin, {{ user }} <span class="muted">({{ user.get_role_display }})</span>.
-      <form method="post" action="{% url 'admin:logout' %}" style="display:inline">{% csrf_token %}<button type="submit">Çıkış</button></form>
-    </p>
-
     {% if user.is_student %}
-      <h2>PO profilin</h2>
-      <table>
-        <thead><tr><th>Program çıktısı</th><th class="score">Puan</th></tr></thead>
-        <tbody>
-          {% for row in po_rows %}
-            <tr>
-              <td>{{ row.outcome }}</td>
-              <td class="score">{% if row.score is not None %}{{ row.score }}{% else %}<span class="muted">—</span>{% endif %}</td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="2" class="muted">Henüz bir puan yok.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="card">
+        <h2>PO profilin</h2>
+        <div class="chart-container">
+          <div class="chart-scroll-wrapper">
+            <div class="bar-chart" role="region" aria-label="Program Çıktıları Grafiği">
+              <!-- Grid lines for Y-axis -->
+              <span class="y-axis-label" style="bottom: 100%;">100</span>
+              <div class="y-axis-line" style="bottom: 100%;"></div>
+
+              <span class="y-axis-label" style="bottom: 75%;">75</span>
+              <div class="y-axis-line" style="bottom: 75%;"></div>
+
+              <span class="y-axis-label" style="bottom: 50%;">50</span>
+              <div class="y-axis-line" style="bottom: 50%;"></div>
+
+              <span class="y-axis-label" style="bottom: 25%;">25</span>
+              <div class="y-axis-line" style="bottom: 25%;"></div>
+
+              <span class="y-axis-label" style="bottom: 0%;">0</span>
+
+              {% for row in po_rows %}
+                <div class="chart-col" title="{{ row.outcome.code }}: {{ row.outcome.short_name }}{% if row.has_score %} ({{ row.score }}){% else %} (Henüz puan yok){% endif %}">
+                  {% if row.has_score %}
+                    <span class="bar-value">{{ row.score }}</span>
+                    <div class="bar-fill" style="height: {{ row.score_percent }}%;"></div>
+                  {% else %}
+                    <span class="bar-value empty">—</span>
+                    <div class="bar-empty" title="Puan yok"></div>
+                  {% endif %}
+                  <span class="bar-label">{{ row.outcome.code }}</span>
+                </div>
+              {% empty %}
+                <p class="muted" style="margin: auto;">Henüz program çıktısı tanımlanmamış.</p>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="chart-caption">
+            <span>💡 Sütunların üzerine gelerek PO detaylarını görebilirsiniz.</span>
+            <span>📱 Mobilde yana kaydırarak tüm PO'ları inceleyebilirsiniz.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>PO Profil Tablosu</h2>
+        <table>
+          <thead><tr><th>Program çıktısı</th><th class="score">Puan</th></tr></thead>
+          <tbody>
+            {% for row in po_rows %}
+              <tr>
+                <td><strong>{{ row.outcome.code }}</strong> – {{ row.outcome.short_name }}</td>
+                <td class="score">{% if row.has_score %}{{ row.score }}{% else %}<span class="muted">—</span>{% endif %}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" class="muted">Henüz bir puan yok.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% elif user.is_staff %}
-      <p><a href="{% url 'admin:index' %}">Yönetim paneline git →</a></p>
+      <div class="card">
+        <p>Yönetim işlemlerini gerçekleştirmek için yönetim paneline geçebilirsiniz.</p>
+        <p><a href="{% url 'admin:index' %}" class="btn-admin">Yönetim paneline git →</a></p>
+      </div>
     {% endif %}
   {% else %}
-    <p><a href="{% url 'admin:login' %}?next=/">Giriş yap</a></p>
+    <div class="card">
+      <p>Program Çıktısı (PO) puanlarınızı görüntülemek veya sisteme erişmek için giriş yapın.</p>
+      <p><a href="{% url 'admin:login' %}?next=/" class="btn-admin">Giriş yap</a></p>
+    </div>
   {% endif %}
 </body>
 </html>
