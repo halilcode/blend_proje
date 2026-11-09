@@ -14,7 +14,14 @@ def home(request):
         outcomes = ProgramOutcome.objects.filter(department=user.department) if user.department_id else (
             ProgramOutcome.objects.filter(id__in=profile.keys())
         )
-        context["po_rows"] = [
-            {"outcome": po, "score": round_score(profile.get(po.id))} for po in outcomes
-        ]
+        po_rows = []
+        for po in outcomes:
+            score = round_score(profile.get(po.id))
+            po_rows.append({
+                "outcome": po,
+                "score": score,
+                "score_percent": f"{score:.1f}" if score is not None else None,
+                "has_score": score is not None,
+            })
+        context["po_rows"] = po_rows
     return render(request, "home.html", context)

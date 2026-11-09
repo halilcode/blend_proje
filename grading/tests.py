@@ -143,3 +143,59 @@ class UserTests(TestCase):
         User.objects.create_user("a", role=User.Role.INSTRUCTOR, student_number="")
         User.objects.create_user("b", role=User.Role.INSTRUCTOR, student_number="")
         self.assertEqual(User.objects.filter(student_number__isnull=True).count(), 2)
+
+
+class StudentPOProfileChartTests(TestCase):
+    """Tests for Issue #10: Student PO profile chart rendering and empty states."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.dept = Department.objects.create(code="CSE", name="Computer Science")
+        cls.po1 = ProgramOutcome.objects.create(department=cls.dept, number=1, short_name="Math & Science")
+        cls.po2 = ProgramOutcome.objects.create(department=cls.dept, number=2, short_name="Problem Solving")
+        cls.po3 = ProgramOutcome.objects.create(department=cls.dept, number=3, short_name="System Design")
+
+        cls.course = Course.objects.create(department=cls.dept, code="CSE 311", name="Software")
+        cls.offering = CourseOffering.objects.create(course=cls.course, year=2026, semester="fall")
+
+        cls.lo1 = LearningOutcome.objects.create(course=cls.course, number=1, description="LO 1")
+        LearningOutcomeMapping.objects.create(learning_outcome=cls.lo1, program_outcome=cls.po1, weight=100)
+
+        cls.midterm = Assessment.objects.create(offering=cls.offering, name="Midterm", kind="midterm")
+        AssessmentMapping.objects.create(assessment=cls.midterm, learning_outcome=cls.lo1, weight=100)
+
+        cls.student = User.objects.create_user(
+            "student_chart", password="password", role=User.Role.STUDENT, department=cls.dept
+        )
+        cls.enrollment = Enrollment.objects.create(student=cls.student, offering=cls.offering)
+        # Grade only feeds po1 (score 90). po2 and po3 have no grades.
+        Grade.objects.create(enrollment=cls.enrollment, assessment=cls.midterm, score=90)
+
+    def test_chart_renders_rated_and_unrated_program_outcomes(self):
+        self.client.login(username="student_chart", password="password")
+        resp = self.client.get("/")
+        self.assertEqual(resp.status_code, 200)
+
+        # Chart container and mobile scroll wrapper must be present
+        self.assertContains(resp, "PO profilin")
+        self.assertContains(resp, "bar-chart")
+        self.assertContains(resp, "chart-scroll-wrapper")
+
+        # PO 1 has score 90.0
+        self.assertContains(resp, "style=\"height: 90.0%;\"")
+
+        # Acceptance criterion: Puanı olmayan PO boş görünüyor, 0 değil
+        self.assertContains(resp, "bar-empty")
+        # Ensure that unrated POs (PO 2 and PO 3) do not display "0.0" as score
+        content = resp.content.decode("utf-8")
+        self.assertNotIn("style=\"height: 0.0%;\"", content)
+        self.assertNotIn("style=\"height: 0%;\"", content)
+        # Empty marker must be present
+        self.assertContains(resp, "bar-value empty")
+
+    def test_mobile_viewport_and_scrollable_container_present(self):
+        self.client.login(username="student_chart", password="password")
+        resp = self.client.get("/")
+        self.assertContains(resp, "name=\"viewport\"")
+        self.assertContains(resp, "chart-scroll-wrapper")
+
