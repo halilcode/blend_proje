@@ -179,7 +179,7 @@
     {% if user.is_authenticated %}
       <div>
         Hoş geldin, <strong>{{ user }}</strong> <span class="muted">({{ user.get_role_display }})</span>
-        <form method="post" action="{% url 'admin:logout' %}" style="display:inline; margin-left: 0.5rem;">
+        <form method="post" action="{% url 'logout' %}" style="display:inline; margin-left: 0.5rem;">
           {% csrf_token %}
           <button type="submit">Çıkış</button>
         </form>
@@ -257,7 +257,7 @@
   {% else %}
     <div class="card">
       <p>Program Çıktısı (PO) puanlarınızı görüntülemek veya sisteme erişmek için giriş yapın.</p>
-      <p><a href="{% url 'admin:login' %}?next=/" class="btn-admin">Giriş yap</a></p>
+      <p><a href="{% url 'login' %}" class="btn-admin">Giriş yap</a></p>
     </div>
   {% endif %}
 </body>
