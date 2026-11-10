@@ -121,6 +121,13 @@ LOGOUT_REDIRECT_URL = "home"
 # technical CSRF error page. The CSRF check itself is unchanged.
 CSRF_FAILURE_VIEW = "config.views.csrf_failure"
 
+# Keep the CSRF token in the server-side session instead of a separate
+# "csrftoken" cookie. Some browser/proxy setups (seen with GitHub Codespaces
+# port forwarding) sent a stale or duplicate csrftoken cookie, so every form
+# failed with "CSRF token incorrect". The session cookie is already required
+# for login, so this removes a second cookie that could go out of sync.
+CSRF_USE_SESSIONS = True
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
