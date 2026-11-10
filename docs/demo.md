@@ -32,7 +32,7 @@ Demo verisini sıfırlamak için (ör. prova sonrası değiştirilen notları ge
 
 | Kullanıcı | Rol | Ne görür |
 |---|---|---|
-| `elif`, `can`, `deniz`, `mert` | Öğrenci | Yalnızca kendi PO profili |
+| `elif`, `can`, `deniz`, `mert` | Öğrenci | Yalnızca kendi PO profili, notları ve LO puanları |
 | `hoca` (Ahmet Hoca) | Öğretim üyesi | CSE 311 ve MAT 241 |
 | `hoca2` (Ayşe Hoca) | Öğretim üyesi | CSE 321 |
 | `bolum_baskani` | Bölüm başkanı | Bölümün tüm dersleri; PO ve katkı düzeylerini düzenler, not değiştiremez |
@@ -48,7 +48,8 @@ Demo verisini sıfırlamak için (ör. prova sonrası değiştirilen notları ge
 2. PO profili grafiği: PO 1 = **85,0** ve PO 2 = **82,9**, proje dokümanındaki örnekle birebir aynı. PO 3–7 diğer derslerden geliyor.
 3. Bir sütunun üzerine gelin: PO'nun adı ve puanı açılır. PO 8–11'de "Henüz puan yok" yazar, **0 değil**.
 4. Aşağıdaki tablo aynı değerleri listeler.
-5. *(İsteğe bağlı)* Çıkış → `deniz`: CSE 321 kısa sınavının notu henüz girilmedi. Puanlar yine hesaplanır, eksik not sıfır sayılıp ortalamayı düşürmez.
+5. **Derslerim ve notlarım**: her dersin notları ve LO puanları. CSE 311'de Midterm 90, Project 80 → LO 1 = 86,0, LO 2 = 82,9; PO puanlarının nereden geldiği burada görülür. CSE 321'deki 20 puanlık kısa sınav %85,0 olarak gösterilir.
+6. *(İsteğe bağlı)* Çıkış → `deniz`: CSE 321 kısa sınavı "Henüz girilmedi" görünür. Puanlar yine hesaplanır, eksik not sıfır sayılıp ortalamayı düşürmez.
 
 ### 2. Öğretim üyesi bakışı (2–3 dk)
 
