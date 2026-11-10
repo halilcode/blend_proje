@@ -44,7 +44,7 @@ class DepartmentAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
 @admin.register(ProgramOutcome)
 class ProgramOutcomeAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("code", "short_name", "department")
-    list_filter = ("department",)
+    list_filter = (("department", admin.RelatedOnlyFieldListFilter),)
     search_fields = ("short_name", "description")
 
     dept_field = "department"
@@ -100,7 +100,7 @@ class CourseContributionInline(RoleScopedInlineMixin, admin.TabularInline):
 @admin.register(Course)
 class CourseAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("code", "name", "department", "credits", "ects")
-    list_filter = ("department",)
+    list_filter = (("department", admin.RelatedOnlyFieldListFilter),)
     search_fields = ("code", "name")
     inlines = [LearningOutcomeInline, CourseContributionInline]
 
@@ -119,7 +119,7 @@ class CourseAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
 @admin.register(CourseContribution)
 class CourseContributionAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("course", "program_outcome", "level")
-    list_filter = ("course__department", "level")
+    list_filter = (("course__department", admin.RelatedOnlyFieldListFilter), "level")
     search_fields = ("course__code", "course__name", "program_outcome__short_name")
 
     dept_field = "course__department"
@@ -148,7 +148,7 @@ class LearningOutcomeMappingInline(RoleScopedInlineMixin, admin.TabularInline):
 @admin.register(LearningOutcome)
 class LearningOutcomeAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("__str__", "course", "description")
-    list_filter = ("course",)
+    list_filter = (("course", admin.RelatedOnlyFieldListFilter),)
     inlines = [LearningOutcomeMappingInline]
 
     dept_field = "course__department"
@@ -166,7 +166,7 @@ class LearningOutcomeAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
 @admin.register(CourseOffering)
 class CourseOfferingAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("course", "year", "semester", "section")
-    list_filter = ("year", "semester", "course__department")
+    list_filter = ("year", "semester", ("course__department", admin.RelatedOnlyFieldListFilter))
     search_fields = ("course__code", "course__name")
     filter_horizontal = ("instructors",)
 

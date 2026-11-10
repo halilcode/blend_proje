@@ -22,7 +22,7 @@ class AssessmentMappingInline(RoleScopedInlineMixin, admin.TabularInline):
 @admin.register(Assessment)
 class AssessmentAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("name", "kind", "offering", "max_score", "date")
-    list_filter = ("kind", "offering__year", "offering__semester", "offering__course")
+    list_filter = ("kind", "offering__year", "offering__semester", ("offering__course", admin.RelatedOnlyFieldListFilter))
     search_fields = ("name", "offering__course__code")
     inlines = [AssessmentMappingInline]
 
@@ -62,7 +62,7 @@ class GradeInline(RoleScopedInlineMixin, admin.TabularInline):
 @admin.register(Enrollment)
 class EnrollmentAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("student", "offering", "enrolled_at")
-    list_filter = ("offering__year", "offering__semester", "offering__course")
+    list_filter = ("offering__year", "offering__semester", ("offering__course", admin.RelatedOnlyFieldListFilter))
     search_fields = ("student__username", "student__last_name", "student__student_number")
     inlines = [GradeInline]
 
@@ -90,7 +90,7 @@ class EnrollmentAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
 @admin.register(Grade)
 class GradeAdmin(RoleScopedAdminMixin, admin.ModelAdmin):
     list_display = ("enrollment", "assessment", "score", "entered_by", "updated_at")
-    list_filter = ("assessment__offering__course", "assessment__kind")
+    list_filter = (("assessment__offering__course", admin.RelatedOnlyFieldListFilter), "assessment__kind")
     search_fields = ("enrollment__student__username", "enrollment__student__last_name")
     readonly_fields = ("updated_at",)
 
