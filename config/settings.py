@@ -117,6 +117,10 @@ LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
+# Show a friendly page (or skip a stale login form) instead of Django's
+# technical CSRF error page. The CSRF check itself is unchanged.
+CSRF_FAILURE_VIEW = "config.views.csrf_failure"
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},

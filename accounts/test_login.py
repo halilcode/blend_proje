@@ -71,3 +71,52 @@ class SiteLoginTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("_auth_user_id", self.client.session)
+
+
+class CsrfFailureTests(TestCase):
+    """CSRF is still enforced, but failures show a friendly page instead of Django's debug page."""
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo", verbosity=0)
+
+    def setUp(self):
+        self.client = self.client_class(enforce_csrf_checks=True)
+
+    def token_from(self, response):
+        return response.context["csrf_token"]
+
+    def test_double_submitted_login_goes_home_instead_of_error(self):
+        first_token = self.token_from(self.client.get(reverse("login")))
+        credentials = {"username": "elif", "password": "demo12345", "csrfmiddlewaretoken": first_token}
+        self.assertRedirects(self.client.post(reverse("login"), credentials), reverse("home"))
+        # Login rotated the token; the same form submitted again carries the old one.
+        response = self.client.post(reverse("login"), credentials)
+        self.assertRedirects(response, reverse("home"))
+        self.assertEqual(self.client.get(reverse("home")).context["user"].username, "elif")
+
+    def test_anonymous_bad_token_shows_friendly_page_and_rejects(self):
+        self.client.get(reverse("login"))  # sets the CSRF cookie
+        response = self.client.post(
+            reverse("login"),
+            {"username": "elif", "password": "demo12345", "csrfmiddlewaretoken": "x" * 64},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, "Sayfanın süresi doldu", status_code=403)
+        self.assertNotContains(response, "CSRF_FAILURE_VIEW", status_code=403)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_back_link_uses_same_site_referer_only(self):
+        self.client.get(reverse("login"))
+        bad = {"csrfmiddlewaretoken": "x" * 64}
+        same = self.client.post(reverse("login"), bad, HTTP_REFERER="http://testserver/giris/?next=/admin/")
+        self.assertEqual(same.context["back_url"], "http://testserver/giris/?next=/admin/")
+        other = self.client.post(reverse("login"), bad, HTTP_REFERER="https://evil.example.com/")
+        self.assertEqual(other.context["back_url"], reverse("login"))
+
+    def test_logged_in_admin_form_with_stale_token_is_rejected_with_friendly_page(self):
+        token = self.token_from(self.client.get(reverse("login")))
+        self.client.post(reverse("login"), {"username": "hoca", "password": "demo12345", "csrfmiddlewaretoken": token})
+        response = self.client.post("/admin/grading/grade/1/change/", {"score": "100", "csrfmiddlewaretoken": token})
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, "Sayfaya dön", status_code=403)
