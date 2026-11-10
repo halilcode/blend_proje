@@ -26,7 +26,7 @@ python manage.py runserver
 
 Codespaces'te sağ altta çıkan **Open in Browser** ile siteyi açın. Geliştirme modunda Codespaces adresleri otomatik kabul edilir, ek ayar gerekmez.
 
-Demo verisini sıfırlamak için (ör. prova sonrası değiştirilen notları geri almak): `db.sqlite3` dosyasını silip `migrate` ve `seed_demo` komutlarını tekrar çalıştırın.
+Demo verisini sıfırlamak için (ör. prova sonrası değiştirilen notları geri almak): sunucuyu durdurun, `db.sqlite3` dosyasını silip `migrate` ve `seed_demo` komutlarını tekrar çalıştırın. **Sunumdan önce mutlaka yapın**, yoksa Elif 85,0 yerine provadaki notla başlar.
 
 ## Demo verisi
 
@@ -55,7 +55,9 @@ Demo verisini sıfırlamak için (ör. prova sonrası değiştirilen notları ge
 1. Çıkış → **Giriş yap** → `hoca` → **Yönetim paneline git**.
 2. **Grades**: yalnızca CSE 311 ve MAT 241 notları görünür; CSE 321 (Ayşe Hoca'nın dersi) ne listede ne de filtre menüsünde var.
 3. Elif'in **CSE 311 · Project** notunu açın, 80 → **100** yapıp kaydedin.
-4. Yeni sekmede `elif` ile girin: PO 1 **85,0 → 95,0**, PO 2 **82,9 → 97,1** olur. Not girildiği anda PO puanı güncellenir.
+4. **Çıkış** yapıp aynı sekmede `elif` ile girin: PO 1 **85,0 → 95,0**, PO 2 **82,9 → 97,1** olur. Not girildiği anda PO puanı güncellenir.
+
+> **Dikkat:** Aynı tarayıcıdaki sekmeler tek oturumu paylaşır. Bir sekmede başka hesapla giriş yapılırsa diğer sekmedeki açık form "CSRF doğrulaması başarısız" (403) hatası verir. İki hesabı yan yana göstermek için ikincisini **gizli pencerede** (Ctrl + Shift + N) açın. Hata görülürse sayfayı yenileyip (F5) tekrar kaydedin.
 
 ### 3. Bölüm başkanı bakışı (1 dk)
 
