@@ -112,7 +112,10 @@ class CsrfFailureTests(TestCase):
         same = self.client.post(reverse("login"), bad, HTTP_REFERER="http://testserver/giris/?next=/admin/")
         self.assertEqual(same.context["back_url"], "http://testserver/giris/?next=/admin/")
         other = self.client.post(reverse("login"), bad, HTTP_REFERER="https://evil.example.com/")
-        self.assertEqual(other.context["back_url"], reverse("login"))
+        self.assertEqual(other.context["back_url"], reverse("home"))
+        # No referer: never link back to a POST-only URL (it would answer 405).
+        none = self.client.post(reverse("login"), bad)
+        self.assertEqual(none.context["back_url"], reverse("home"))
 
     def test_logged_in_admin_form_with_stale_token_is_rejected_with_friendly_page(self):
         token = self.token_from(self.client.get(reverse("login")))
@@ -120,3 +123,31 @@ class CsrfFailureTests(TestCase):
         response = self.client.post("/admin/grading/grade/1/change/", {"score": "100", "csrfmiddlewaretoken": token})
         self.assertEqual(response.status_code, 403)
         self.assertContains(response, "Sayfaya dön", status_code=403)
+
+    def login_via_form(self, username):
+        token = self.token_from(self.client.get(reverse("login")))
+        return self.client.post(
+            reverse("login"),
+            {"username": username, "password": "demo12345", "csrfmiddlewaretoken": token},
+        )
+
+    def test_logout_via_form_with_valid_token(self):
+        self.login_via_form("elif")
+        token = self.token_from(self.client.get(reverse("home")))
+        response = self.client.post(reverse("logout"), {"csrfmiddlewaretoken": token})
+        self.assertRedirects(response, reverse("home"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_logout_with_stale_token_still_logs_out(self):
+        self.login_via_form("hoca")
+        response = self.client.post(reverse("logout"), {"csrfmiddlewaretoken": "x" * 64})
+        self.assertRedirects(response, reverse("home"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_csrf_token_lives_in_session_not_in_a_cookie(self):
+        # No separate "csrftoken" cookie can go out of sync with the form:
+        # the token is stored in the server-side session.
+        response = self.client.get(reverse("login"))
+        self.assertNotIn("csrftoken", response.cookies)
+        self.assertRedirects(self.login_via_form("hoca"), reverse("home"))
+        self.assertNotIn("csrftoken", self.client.cookies)
