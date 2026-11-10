@@ -30,6 +30,14 @@ DEBUG = env_bool("DJANGO_DEBUG", default=True)
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
+if DEBUG:
+    # Development only: GitHub Codespaces serves the dev server over HTTPS on
+    # https://<name>-8000.app.github.dev (or https://localhost:8000 via VS Code
+    # port forwarding), while runserver speaks plain HTTP. Trust those origins so
+    # forms (e.g. login) pass the CSRF origin check without extra env variables.
+    ALLOWED_HOSTS += [".app.github.dev"]
+    CSRF_TRUSTED_ORIGINS += ["https://localhost:8000", "https://*.app.github.dev"]
+
 
 # --- Applications -------------------------------------------------------------
 

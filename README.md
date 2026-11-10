@@ -12,7 +12,7 @@ Her adımda kullanılan formül:
 puan = Σ(ağırlık × puan) ÷ Σ ağırlıklar
 ```
 
-Ayrıntılar ve ER diyagramı için: [docs/data-model.md](docs/data-model.md)
+Ayrıntılar ve ER diyagramı için: [docs/data-model.md](docs/data-model.md) · Canlı demo akışı: [docs/demo.md](docs/demo.md)
 
 ## Kurulum
 
@@ -49,9 +49,9 @@ Demo kullanıcıların hepsinin şifresi `demo12345`:
 | Kullanıcı | Rol |
 |---|---|
 | `admin` | Sistem yöneticisi (yönetim paneli) |
-| `bolum_baskani` | Bölüm başkanı |
-| `hoca` | Öğretim üyesi |
-| `elif` | Öğrenci (ana sayfada PO profilini görür) |
+| `bolum_baskani` | Bölüm başkanı (bölümün tüm dersleri) |
+| `hoca`, `hoca2` | Öğretim üyesi (yalnızca kendi dersleri) |
+| `elif`, `can`, `deniz`, `mert` | Öğrenci (ana sayfada kendi PO profilini görür) |
 
 ## Testler
 
