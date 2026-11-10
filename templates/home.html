@@ -207,6 +207,24 @@
     th, td { text-align: left; padding: .65rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
     th { font-weight: 600; color: var(--text-muted); }
     td.score { text-align: right; font-variant-numeric: tabular-nums; width: 6rem; font-weight: 600; }
+    /* Student grades section (per-course grades and LO scores) */
+    details.course {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+    }
+    details.course summary {
+      cursor: pointer;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.75rem;
+      align-items: baseline;
+    }
+    details.course summary .course-code { font-weight: 700; }
+    details.course h3 { font-size: 0.95rem; color: #334155; margin: 1.25rem 0 0; }
+    td.pct { text-align: right; font-variant-numeric: tabular-nums; width: 5rem; color: var(--text-muted); }
+    .pending { color: var(--text-muted); font-style: italic; font-weight: normal; }
     .muted { color: var(--text-muted); }
     button {
       background: #e2e8f0;
@@ -309,6 +327,56 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+
+      <div class="card">
+        <h2>Derslerim ve notlarım</h2>
+        <p class="muted" style="margin-top:0">Notlarınız ve her dersin öğrenme çıktısı (LO) puanları. Program çıktısı puanlarınız bu LO puanlarından hesaplanır.</p>
+        {% for course in course_details %}
+          <details class="course" open>
+            <summary>
+              <span class="course-code">{{ course.course.code }}</span>
+              <span>{{ course.course.name }}</span>
+              <span class="muted">· {{ course.offering.year }} {{ course.offering.get_semester_display }} · {{ course.graded_count }}/{{ course.assessments|length }} not girildi</span>
+            </summary>
+
+            <table>
+              <thead><tr><th>Değerlendirme</th><th class="score">Not</th><th class="pct">Yüzde</th></tr></thead>
+              <tbody>
+                {% for row in course.assessments %}
+                  <tr>
+                    <td>{{ row.assessment.name }} <span class="muted">· {{ row.assessment.get_kind_display }}</span></td>
+                    {% if row.score is not None %}
+                      <td class="score">{{ row.score|floatformat:"-2" }} / {{ row.assessment.max_score|floatformat:"-2" }}</td>
+                      <td class="pct">%{{ row.percentage }}</td>
+                    {% else %}
+                      <td class="score pending" colspan="2">Henüz girilmedi</td>
+                    {% endif %}
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="3" class="muted">Bu derste henüz değerlendirme tanımlanmadı.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+            <h3>Öğrenme çıktıları</h3>
+            <table>
+              <thead><tr><th>Öğrenme çıktısı</th><th class="score">Puan</th></tr></thead>
+              <tbody>
+                {% for row in course.learning_outcomes %}
+                  <tr>
+                    <td><strong>{{ row.outcome.code }}</strong> – {{ row.outcome.description }}</td>
+                    <td class="score">{% if row.score is not None %}{{ row.score }}{% else %}<span class="muted">—</span>{% endif %}</td>
+                  </tr>
+                {% empty %}
+                  <tr><td colspan="2" class="muted">Bu ders için öğrenme çıktısı tanımlanmadı.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </details>
+        {% empty %}
+          <p class="muted">Henüz kayıtlı olduğunuz bir ders yok.</p>
+        {% endfor %}
       </div>
     {% elif user.is_staff %}
       <div class="card">
