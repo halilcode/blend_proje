@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sayfanın süresi doldu · PO Takip Sistemi</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 520px;
+      margin: 4rem auto;
+      padding: 0 1rem;
+      color: #1e293b;
+      background-color: #f8fafc;
+      line-height: 1.5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    h1 { margin: 0 0 0.5rem; font-size: 1.4rem; color: #0f172a; }
+    p { margin: 0 0 1rem; color: #475569; }
+    a.btn {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      text-decoration: none;
+      padding: 0.55rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    a.btn:hover { background: #1d4ed8; }
+    a.muted { margin-left: 1rem; color: #64748b; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Sayfanın süresi doldu</h1>
+    <p>Güvenliğiniz için bu form gönderilmedi. Bu genellikle form iki kez gönderildiğinde ya da başka bir sekmede giriş/çıkış yapıldığında olur.</p>
+    <p>Sayfayı yenileyip işlemi tekrar deneyin.</p>
+    <a class="btn" href="{{ back_url }}">Sayfaya dön</a>
+    <a class="muted" href="{% url 'home' %}">Ana sayfa</a>
+  </div>
+</body>
+</html>
