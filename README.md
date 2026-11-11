@@ -59,6 +59,22 @@ Demo kullanıcıların hepsinin şifresi `demo12345`:
 python manage.py test
 ```
 
+## Geliştirme süreci
+
+**Branching modeli: GitHub Flow.** Tek uzun ömürlü dal `main`'dir ve her zaman testleri geçen sürümdür. Her iş, `main`'den açılan kısa ömürlü bir dalda yapılır: `feature/…` (yeni özellik), `fix/…` (hata düzeltme), `docs/…` (dokümantasyon). Ayrı bir development, release veya deployment dalı kullanmıyoruz; yayına alma (#20) doğrudan `main`'den yapılacak.
+
+1. `git switch main && git pull`
+2. `git switch -c feature/<issue-no>-<kısa-ad>`
+3. Küçük, açık mesajlı commit'ler
+4. `git push -u origin feature/<issue-no>-<kısa-ad>` ve pull request: ne, neden, nasıl test edilir; açıklamada `Closes #<issue-no>`
+5. CI yeşil ve en az bir takım arkadaşı onayladıktan sonra birleştirilir, dal silinir
+
+`main` korumalıdır: doğrudan push ve force-push kapalı, birleştirme için pull request ve 1 onay gerekir.
+
+**Backlog:** GitHub Issues. Her iş bir user story'dir ("As a …, I want …, so that …") ve kabul kriterleri içerir. Zorluk Fibonacci story point etiketiyle (`sp: 2` … `sp: 13`), sprint milestone ile işaretlenir. Sprintler 1 haftadır.
+
+**Bitti tanımı (Definition of Done):** kabul kriterleri karşılandı, testleri yazıldı, CI yeşil, pull request onaylandı ve `main`'e birleşti.
+
 ## Proje yapısı
 
 ```
