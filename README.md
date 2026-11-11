@@ -59,6 +59,26 @@ Demo kullanıcıların hepsinin şifresi `demo12345`:
 python manage.py test
 ```
 
+## Geliştirme süreci
+
+**Branching modeli: GitHub Flow.** Tek uzun ömürlü dal `main`'dir ve her zaman testleri geçen sürümdür. Her iş, `main`'den açılan kısa ömürlü bir dalda yapılır: `feature/…` (yeni özellik), `fix/…` (hata düzeltme), `docs/…` (dokümantasyon). Ayrı bir development, release veya deployment dalı kullanmıyoruz; yayına alma (#20) doğrudan `main`'den yapılacak.
+
+1. `git switch main && git pull`
+2. `git switch -c feature/<issue-no>-<kısa-ad>`
+3. Küçük, açık mesajlı commit'ler
+4. `git push -u origin feature/<issue-no>-<kısa-ad>` ve pull request: ne, neden, nasıl test edilir; açıklamada `Closes #<issue-no>`
+5. CI yeşil ve en az bir takım arkadaşı onayladıktan sonra birleştirilir, dal silinir
+
+`main` korumalıdır: doğrudan push ve force-push kapalı, birleştirme için pull request ve 1 onay gerekir.
+
+**Backlog:** GitHub Issues. Her iş bir user story'dir ("As a …, I want …, so that …") ve kabul kriterleri içerir. Sprintler 1 haftadır ve her sprint bir milestone'dur.
+
+**Tahmin: Planning Poker.** Sprint planlamasında her story 1, 3, 5, 8, 13 kartlarıyla puanlanır: herkes kartını gizli seçer, kartlar birlikte açılır. Herkes iki kart aralığındaysa ortalama alınır; daha uzaksa en yüksek ve en düşük kartı açan nedenini anlatır ve yeniden oylanır. Sonuç story'ye `sp: …` etiketi olarak yazılır. 13 puanlık bir story sprinte alınmadan önce bölünür.
+
+**Pano:** GitHub Projects'teki *Blend Sprint Board* (Backlog → To Do → Doing → Done). Bir kart, bitti tanımını karşılamadan Done'a taşınmaz.
+
+**Bitti tanımı (Definition of Done):** kabul kriterleri karşılandı, testleri yazıldı, CI yeşil, pull request onaylandı ve `main`'e birleşti.
+
 ## Proje yapısı
 
 ```
